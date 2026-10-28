@@ -1,0 +1,102 @@
+// Robot squads for ctf_2fort - added to scripts/robot_squads.txt on this map.
+// Doorways, stairwells and sewers are no place for giants, so the squads that
+// normally bring one get a regular-sized replacement here instead.
+
+"RobotSquads"
+{
+	// Replaces the global Heavy Brigade: a third Heavy instead of the Giant Heavy
+	"Squad"
+	{
+		"Name"			"heavy_brigade"
+		"DisplayName"	"Heavy Brigade"
+		"RespawnDelay"	"12"
+
+		"TFBot"
+		{
+			"Template"	"T_HeavyKit"
+			"Skill"		"Normal"
+			"Count"		"2"
+		}
+		"TFBot"
+		{
+			"Template"	"T_MedicKit"
+			"Skill"		"Normal"
+		}
+		"TFBot"
+		{
+			"Template"	"T_MedicKit"
+			"Skill"		"Normal"
+			"MinLevel"	"2"
+		}
+		"TFBot"
+		{
+			"Template"	"T_HeavyKit"
+			"Skill"		"Hard"
+			"MinLevel"	"3"
+		}
+	}
+
+	// Replaces the global Giant Escort, which doesn't fit through the doors here
+	"Squad"
+	{
+		"Name"			"giant_escort"
+		"DisplayName"	"Heavy Escort"
+
+		"TFBot"
+		{
+			"Template"	"T_SoldierKit"
+			"Skill"		"Hard"
+			"Count"		"2"
+		}
+		"TFBot"
+		{
+			"Template"	"T_MedicKit"
+			"Skill"		"Hard"
+		}
+		"TFBot"
+		{
+			"Template"	"T_HeavyKit"
+			"Skill"		"Hard"
+			"MinLevel"	"2"
+		}
+		"TFBot"
+		{
+			"Template"	"T_HeavyKit"
+			"Skill"		"Hard"
+			"MinLevel"	"3"
+		}
+	}
+
+	// Scouts and Spies to sneak through the sewers and grab the intel - 4 / 5 / 6 robots
+	"Squad"
+	{
+		"Name"			"2fort_sewer_rats"
+		"DisplayName"	"Sewer Rats"
+		"SpawnInterval"	"1"
+		"RespawnDelay"	"6"
+
+		"TFBot"
+		{
+			"Template"	"T_ScoutKit"
+			"Skill"		"Normal"
+			"Count"		"3"
+		}
+		"TFBot"
+		{
+			"Class"		"Spy"
+			"Skill"		"Normal"
+		}
+		"TFBot"
+		{
+			"Template"	"T_ScoutKit"
+			"Skill"		"Hard"
+			"MinLevel"	"2"
+		}
+		"TFBot"
+		{
+			"Class"		"Spy"
+			"Skill"		"Hard"
+			"MinLevel"	"3"
+		}
+	}
+}

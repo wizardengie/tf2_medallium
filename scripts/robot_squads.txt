@@ -1,0 +1,789 @@
+// Engineer robot squads (tf_robot_squad_enabled 1)
+//
+// Every Engineer teleporter exit is also a robot factory for its team. Like an MvM
+// engineer's teleporter, it sends robots through one at a time until the squad is
+// full, and refills each robot's place a while after it dies. Higher teleporter
+// levels send robots faster, and squads can add members (or giants) per level.
+//
+// Engineers pick their squad from the Robot Factory menu: right-click with the build
+// PDA out, or bind "tf_robot_squad_select" (or "tf_robot_squad_select <Name>").
+// Each Squad below is one entry in that menu. Until they pick, they get "default".
+//
+// Per-map squads: scripts/robot_squads/<mapname>.txt uses this same format. Its
+// templates and squads are added to these, and a squad with the same Name as one
+// here replaces it on that map (e.g. a version without a giant for tight maps).
+// Put "ReplaceGlobalSquads" "1" at the top of a map file to use only its squads.
+//
+// Squad keys:
+//   Name           id for the squad ("default" is what Engineers start with)
+//   DisplayName    what the menu shows (keep it under ~30 characters)
+//   SpawnInterval  seconds the exit takes to send each robot through, otherwise
+//                  tf_robot_squad_spawn_interval (giants use tf_robot_squad_giant_spawn_time)
+//   RespawnDelay   seconds after a robot dies before its place is refilled,
+//                  otherwise tf_robot_squad_respawn_time
+//   TFBot { }      a squad member
+//
+// TFBot keys are the same as in MvM popfiles (Class, Name, Health, Scale, Skill,
+// WeaponRestrictions, Attributes, Item, ItemAttributes, CharacterAttributes, Tag,
+// MaxVisionRange, Template) plus:
+//   Count          how many of this member (default 1)
+//   MinLevel       lowest teleporter level this member shows up at (default 1)
+//   MaxLevel       highest teleporter level this member shows up at (default 3)
+//   SpawnTime      seconds the exit takes to send this member through
+//   Model          a custom robot model (UseCustomModel works too), e.g.
+//                  "models/bots/soldier/bot_soldier_gray.mdl" - the files go in
+//                  mod_tf/custom/. Loadouts can set their own Model as well.
+//   UndeadModel    model during Halloween / Full Moon instead of the zombie look
+//                  (Snipers default to the skeleton Sniper if it's installed)
+//   Loadout { }    a loadout this member can carry (see below) - list several
+//
+// Loadouts: every time a member comes through the exit it picks one of its
+// loadouts, favoring the ones that counter what the enemy team is fielding right
+// now. Inside a Loadout block:
+//   Name           shown in the console with "developer 1" when it's picked
+//   Counters       what it's good against: class names, "Sentry" and "Giant",
+//                  space separated - repeat a name to count it more
+//   Orders         squad orders it suits: attack, defend, follow
+//   Weight         how likely it is next to the others (default 1)
+//   Item, ItemAttributes, CharacterAttributes, Attributes
+//                  given on top of the member's own (an Item replaces whatever
+//                  the member had in that slot)
+// The *Kit templates below hold a loadout list per class - use them as a Template
+// and add your own Loadout blocks on top.
+//
+// Squad size is capped by tf_robot_squad_max_per_team (shared by every Engineer on
+// the team) and the server's free player slots, minus tf_robot_squad_reserve_slots.
+// Big squads need a big server: e.g. -maxplayers 64.
+//
+// During Halloween / Full Moon the squads show up as undead instead of robots.
+// Models are precached when the map loads, so a model added to these files later
+// only shows up after a map change.
+//
+// Popfile templates can be pasted in: MvM-only fields like ClassIcon are skipped,
+// and fields from server plugins are skipped with a warning in the console.
+// Reload with tf_robot_squad_reload (cheat), or change maps.
+
+"RobotSquads"
+{
+	"Templates"
+	{
+		"T_GiantHeavy"
+		{
+			"Class"			"Heavyweapons"
+			"Name"			"Giant Heavy"
+			"Skill"			"Hard"
+			"Health"		"5000"
+			"Attributes"	"MiniBoss"
+			"CharacterAttributes"
+			{
+				"move speed bonus"					"0.5"
+				"damage force reduction"			"0.3"
+				"airblast vulnerability multiplier"	"0.3"
+			}
+		}
+
+		"T_GiantSoldier"
+		{
+			"Class"			"Soldier"
+			"Name"			"Giant Soldier"
+			"Skill"			"Hard"
+			"Health"		"3800"
+			"Attributes"	"MiniBoss"
+			"CharacterAttributes"
+			{
+				"move speed bonus"					"0.5"
+				"damage force reduction"			"0.4"
+				"airblast vulnerability multiplier"	"0.4"
+			}
+		}
+
+		"T_GiantPyro"
+		{
+			"Class"			"Pyro"
+			"Name"			"Giant Pyro"
+			"Skill"			"Hard"
+			"Health"		"3000"
+			"Attributes"	"MiniBoss"
+			"CharacterAttributes"
+			{
+				"move speed bonus"					"0.5"
+				"damage force reduction"			"0.6"
+				"airblast vulnerability multiplier"	"0.6"
+			}
+		}
+
+		"T_GiantDemoman"
+		{
+			"Class"			"Demoman"
+			"Name"			"Giant Demoman"
+			"Skill"			"Hard"
+			"Health"		"3300"
+			"Attributes"	"MiniBoss"
+			"CharacterAttributes"
+			{
+				"move speed bonus"					"0.5"
+				"damage force reduction"			"0.5"
+				"airblast vulnerability multiplier"	"0.5"
+			}
+		}
+
+		"T_Demoknight"
+		{
+			"Class"					"Demoman"
+			"Name"					"Demoknight"
+			"WeaponRestrictions"	"MeleeOnly"
+			"Item"					"The Chargin' Targe"
+			"Item"					"The Eyelander"
+		}
+
+		// ---- Elite robots, using the models in mod_tf/custom/robot_assets ----
+
+		"T_Goliatron"
+		{
+			"Class"			"Soldier"
+			"Name"			"Goliatron"
+			"Model"			"models/bots/soldier/goliatron2022_v3.mdl"
+			"Skill"			"Expert"
+			"Health"		"6000"
+			"Attributes"	"MiniBoss"
+			"ItemAttributes"
+			{
+				"ItemName"						"TF_WEAPON_ROCKETLAUNCHER"
+				"fire rate bonus"				"0.2"
+				"clip size upgrade atomic"		"7"
+				"faster reload rate"			"0.4"
+				"Projectile speed increased"	"0.8"
+			}
+			"CharacterAttributes"
+			{
+				"move speed bonus"					"0.5"
+				"damage force reduction"			"0.3"
+				"airblast vulnerability multiplier"	"0.3"
+			}
+		}
+
+		// Saxton Hale's robot double - a fast, hard-hitting brawler
+		"T_Saxtron"
+		{
+			"Class"					"Soldier"
+			"Name"					"Saxtron H413"
+			"Model"					"models/bots/saxtron/bot_saxtron_v2.mdl"
+			"Skill"					"Expert"
+			"Health"				"7000"
+			"Attributes"			"MiniBoss"
+			"WeaponRestrictions"	"MeleeOnly"
+			"ItemAttributes"
+			{
+				"ItemName"					"TF_WEAPON_SHOVEL"
+				"damage bonus"				"3"
+				"fire rate bonus"			"0.8"
+			}
+			"CharacterAttributes"
+			{
+				"move speed bonus"					"0.85"
+				"damage force reduction"			"0.2"
+				"airblast vulnerability multiplier"	"0.2"
+			}
+		}
+
+		"T_GiantBowman"
+		{
+			"Class"			"Sniper"
+			"Name"			"Giant Bowman"
+			"Model"			"models/bots/sniper_boss/bot_sniper_boss.mdl"
+			"Skill"			"Hard"
+			"Health"		"3500"
+			"Attributes"	"MiniBoss"
+			"Item"			"The Huntsman"
+			"Item"			"Jarate"
+			"ItemAttributes"
+			{
+				"ItemName"		"The Huntsman"
+				"damage bonus"	"1.5"
+			}
+			"CharacterAttributes"
+			{
+				"move speed bonus"					"0.5"
+				"damage force reduction"			"0.4"
+				"airblast vulnerability multiplier"	"0.4"
+			}
+		}
+
+		// ---- Loadout kits: one per class, used as a Template ----
+
+		// Every Soldier kit carries a banner
+		"T_SoldierKit"
+		{
+			"Class"		"Soldier"
+			"Loadout"
+			{
+				"Name"		"Buff Banner"
+				"Counters"	"Heavyweapons Engineer Medic"
+				"Orders"	"attack"
+				"Item"		"The Buff Banner"
+			}
+			"Loadout"
+			{
+				"Name"		"Battalion's Backup"
+				"Counters"	"Sniper Scout Spy"
+				"Orders"	"defend"
+				"Item"		"The Battalion's Backup"
+			}
+			"Loadout"
+			{
+				"Name"		"Concheror"
+				"Counters"	"Pyro Demoman"
+				"Orders"	"follow"
+				"Item"		"The Concheror"
+			}
+			"Loadout"
+			{
+				"Name"		"Direct Hit + Buff Banner"
+				"Counters"	"Sentry Sentry Soldier"
+				"Item"		"The Direct Hit"
+				"Item"		"The Buff Banner"
+			}
+		}
+
+		"T_ScoutKit"
+		{
+			"Class"		"Scout"
+			"Loadout"
+			{
+				"Name"		"Bonk! Atomic Punch"
+				"Counters"	"Sentry Sentry Heavyweapons"
+				"Item"		"Bonk! Atomic Punch"
+			}
+			"Loadout"
+			{
+				"Name"		"Crit-a-Cola"
+				"Counters"	"Engineer Medic Sniper"
+				"Orders"	"attack"
+				"Item"		"Crit-a-Cola"
+			}
+			"Loadout"
+			{
+				"Name"		"Mad Milk"
+				"Counters"	"Pyro Soldier Demoman"
+				"Orders"	"defend follow"
+				"Item"		"Mad Milk"
+			}
+		}
+
+		// Every Pyro kit can airblast
+		"T_PyroKit"
+		{
+			"Class"		"Pyro"
+			"Loadout"
+			{
+				"Name"		"Puff and Sting (Degreaser + Reserve Shooter)"
+				"Counters"	"Soldier Demoman Scout"
+				"Item"		"The Degreaser"
+				"Item"		"The Reserve Shooter"
+			}
+			"Loadout"
+			{
+				"Name"		"Detonator + Axtinguisher"
+				"Counters"	"Heavyweapons Medic Engineer"
+				"Orders"	"attack"
+				"Item"		"The Detonator"
+				"Item"		"The Axtinguisher"
+			}
+			"Loadout"
+			{
+				"Name"		"Gas Passer"
+				"Counters"	"Spy Sniper"
+				"Orders"	"defend"
+				"Item"		"The Gas Passer"
+				"Item"		"The Axtinguisher"
+			}
+		}
+
+		// All four mediguns
+		"T_MedicKit"
+		{
+			"Class"		"Medic"
+			"Loadout"
+			{
+				"Name"		"Medi Gun"
+				"Counters"	"Sentry Sentry Giant"
+			}
+			"Loadout"
+			{
+				"Name"		"Kritzkrieg"
+				"Counters"	"Heavyweapons Engineer"
+				"Orders"	"attack"
+				"Item"		"The Kritzkrieg"
+			}
+			"Loadout"
+			{
+				"Name"		"Quick-Fix"
+				"Counters"	"Pyro Scout"
+				"Orders"	"follow"
+				"Item"		"The Quick-Fix"
+			}
+			"Loadout"
+			{
+				"Name"		"Vaccinator"
+				"Counters"	"Soldier Demoman Sniper"
+				"Orders"	"defend"
+				"Item"		"The Vaccinator"
+			}
+		}
+
+		"T_HeavyKit"
+		{
+			"Class"		"Heavyweapons"
+			"Loadout"
+			{
+				"Name"		"Sandvich"
+				"Counters"	"Scout Soldier"
+				"Orders"	"defend"
+				"Item"		"The Sandvich"
+			}
+			"Loadout"
+			{
+				"Name"		"Dalokohs Bar"
+				"Counters"	"Pyro Spy"
+				"Item"		"The Dalokohs Bar"
+			}
+			"Loadout"
+			{
+				"Name"		"Buffalo Steak Sandvich"
+				"Counters"	"Sniper Engineer Medic"
+				"Orders"	"attack"
+				"Item"		"The Buffalo Steak Sandvich"
+			}
+		}
+
+		"T_SniperKit"
+		{
+			"Class"		"Sniper"
+			"Loadout"
+			{
+				"Name"		"Rifle + Jarate"
+				"Counters"	"Spy Heavyweapons Giant"
+				"Orders"	"defend"
+				"Item"		"Jarate"
+			}
+			"Loadout"
+			{
+				"Name"		"Huntsman + Jarate"
+				"Counters"	"Scout Pyro Soldier"
+				"Orders"	"attack follow"
+				"Item"		"The Huntsman"
+				"Item"		"Jarate"
+			}
+		}
+
+		"T_DemoknightKit"
+		{
+			"Template"	"T_Demoknight"
+			"Loadout"
+			{
+				"Name"		"Chargin' Targe + Eyelander"
+				"Counters"	"Pyro Scout"
+				"Item"		"The Chargin' Targe"
+				"Item"		"The Eyelander"
+			}
+			"Loadout"
+			{
+				"Name"		"Splendid Screen + Persian Persuader"
+				"Counters"	"Soldier Demoman"
+				"Item"		"The Splendid Screen"
+				"Item"		"The Persian Persuader"
+			}
+			"Loadout"
+			{
+				"Name"		"Tide Turner + Eyelander"
+				"Counters"	"Heavyweapons Sniper Engineer"
+				"Item"		"The Tide Turner"
+				"Item"		"The Eyelander"
+			}
+		}
+	}
+
+	// Mixed infantry - 3 / 5 / 7 robots
+	"Squad"
+	{
+		"Name"			"default"
+		"DisplayName"	"Robot Infantry"
+
+		"TFBot"
+		{
+			"Template"	"T_SoldierKit"
+			"Skill"		"Normal"
+			"Count"		"2"
+		}
+		"TFBot"
+		{
+			"Template"	"T_ScoutKit"
+			"Skill"		"Normal"
+		}
+		"TFBot"
+		{
+			"Class"		"Demoman"
+			"Skill"		"Normal"
+			"MinLevel"	"2"
+		}
+		"TFBot"
+		{
+			"Template"	"T_SoldierKit"
+			"Skill"		"Normal"
+			"MinLevel"	"2"
+		}
+		"TFBot"
+		{
+			"Template"	"T_HeavyKit"
+			"Skill"		"Normal"
+			"MinLevel"	"3"
+		}
+		"TFBot"
+		{
+			"Template"	"T_MedicKit"
+			"Skill"		"Normal"
+			"MinLevel"	"3"
+		}
+	}
+
+	// A wall of Pyros, led by a Giant Pyro at level 3 - 3 / 5 / 6 robots
+	"Squad"
+	{
+		"Name"			"pyro_mob"
+		"DisplayName"	"Pyro Mob"
+		"RespawnDelay"	"8"
+
+		"TFBot"
+		{
+			"Template"	"T_PyroKit"
+			"Skill"		"Normal"
+			"Count"		"3"
+		}
+		"TFBot"
+		{
+			"Template"	"T_PyroKit"
+			"Skill"		"Hard"
+			"Count"		"2"
+			"MinLevel"	"2"
+		}
+		"TFBot"
+		{
+			"Template"	"T_GiantPyro"
+			"MinLevel"	"3"
+		}
+	}
+
+	// Lots of fast, fragile Scouts that pour out quickly - 4 / 6 / 8 robots
+	"Squad"
+	{
+		"Name"			"scout_rush"
+		"DisplayName"	"Scout Rush"
+		"SpawnInterval"	"1"
+		"RespawnDelay"	"6"
+
+		"TFBot"
+		{
+			"Template"	"T_ScoutKit"
+			"Skill"		"Normal"
+			"Count"		"4"
+		}
+		"TFBot"
+		{
+			"Template"	"T_ScoutKit"
+			"Skill"		"Normal"
+			"Count"		"2"
+			"MinLevel"	"2"
+		}
+		"TFBot"
+		{
+			"Template"	"T_ScoutKit"
+			"Skill"		"Hard"
+			"Count"		"2"
+			"MinLevel"	"3"
+		}
+	}
+
+	// Demoknights, then a Giant Demoman at level 3 - 3 / 5 / 6 robots
+	"Squad"
+	{
+		"Name"			"demoknights"
+		"DisplayName"	"Demoknight Charge"
+
+		"TFBot"
+		{
+			"Template"	"T_DemoknightKit"
+			"Skill"		"Normal"
+			"Count"		"3"
+		}
+		"TFBot"
+		{
+			"Template"	"T_DemoknightKit"
+			"Skill"		"Hard"
+			"Count"		"2"
+			"MinLevel"	"2"
+		}
+		"TFBot"
+		{
+			"Template"	"T_GiantDemoman"
+			"MinLevel"	"3"
+		}
+	}
+
+	// Heavies with Medics. At level 3 a Giant Heavy leads them - 3 / 4 / 5 robots
+	"Squad"
+	{
+		"Name"			"heavy_brigade"
+		"DisplayName"	"Heavy Brigade"
+		"RespawnDelay"	"12"
+
+		"TFBot"
+		{
+			"Template"	"T_HeavyKit"
+			"Skill"		"Normal"
+			"Count"		"2"
+		}
+		"TFBot"
+		{
+			"Template"	"T_MedicKit"
+			"Skill"		"Normal"
+		}
+		"TFBot"
+		{
+			"Template"	"T_MedicKit"
+			"Skill"		"Normal"
+			"MinLevel"	"2"
+		}
+		"TFBot"
+		{
+			"Template"	"T_GiantHeavy"
+			"MinLevel"	"3"
+		}
+	}
+
+	// Soldiers, with a Giant Soldier at level 3 - 4 / 5 / 6 robots
+	"Squad"
+	{
+		"Name"			"soldier_battalion"
+		"DisplayName"	"Soldier Battalion"
+
+		"TFBot"
+		{
+			"Template"	"T_SoldierKit"
+			"Skill"		"Normal"
+			"Count"		"3"
+		}
+		"TFBot"
+		{
+			"Template"	"T_MedicKit"
+			"Skill"		"Normal"
+		}
+		"TFBot"
+		{
+			"Template"	"T_SoldierKit"
+			"Skill"		"Hard"
+			"MinLevel"	"2"
+		}
+		"TFBot"
+		{
+			"Template"	"T_GiantSoldier"
+			"MinLevel"	"3"
+		}
+	}
+
+	// Two giants and their escort at level 3 - slow to arrive, hard to stop - 3 / 4 / 6 robots
+	"Squad"
+	{
+		"Name"			"giant_escort"
+		"DisplayName"	"Giant Escort"
+		"RespawnDelay"	"15"
+
+		"TFBot"
+		{
+			"Template"	"T_SoldierKit"
+			"Skill"		"Hard"
+			"Count"		"2"
+		}
+		"TFBot"
+		{
+			"Template"	"T_MedicKit"
+			"Skill"		"Hard"
+		}
+		"TFBot"
+		{
+			"Template"	"T_GiantSoldier"
+			"MinLevel"	"2"
+		}
+		"TFBot"
+		{
+			"Template"	"T_GiantHeavy"
+			"MinLevel"	"3"
+		}
+		"TFBot"
+		{
+			"Template"	"T_MedicKit"
+			"Skill"		"Hard"
+			"MinLevel"	"3"
+		}
+	}
+
+	// Gray Mann's robots - 4 / 6 / 7 robots, a gray Giant Soldier at level 3
+	"Squad"
+	{
+		"Name"			"gray_mann"
+		"DisplayName"	"Gray Mann Brigade"
+
+		"TFBot"
+		{
+			"Template"	"T_SoldierKit"
+			"Model"		"models/bots/soldier/bot_soldier_gray.mdl"
+			"Skill"		"Hard"
+			"Count"		"2"
+		}
+		"TFBot"
+		{
+			"Template"	"T_ScoutKit"
+			"Model"		"models/bots/scout/bot_scout_gray.mdl"
+			"Skill"		"Hard"
+		}
+		"TFBot"
+		{
+			"Class"		"Demoman"
+			"Model"		"models/bots/demo/bot_demo_gray.mdl"
+			"Skill"		"Hard"
+		}
+		"TFBot"
+		{
+			"Template"	"T_HeavyKit"
+			"Model"		"models/bots/heavy/bot_heavy_gray.mdl"
+			"Skill"		"Hard"
+			"MinLevel"	"2"
+		}
+		"TFBot"
+		{
+			"Template"	"T_MedicKit"
+			"Model"		"models/bots/medic/bot_medic_gray.mdl"
+			"Skill"		"Hard"
+			"MinLevel"	"2"
+		}
+		"TFBot"
+		{
+			"Template"	"T_GiantSoldier"
+			"Name"		"Gray Giant Soldier"
+			"Model"		"models/bots/soldier_boss/bot_soldier_gray_boss.mdl"
+			"MinLevel"	"3"
+		}
+	}
+
+	// Gibby's scrap-heap robots - 3 / 5 / 6 robots, a Gibby Giant Heavy at level 3
+	"Squad"
+	{
+		"Name"			"gibby_gang"
+		"DisplayName"	"Gibby Gang"
+		"RespawnDelay"	"8"
+
+		"TFBot"
+		{
+			"Template"	"T_PyroKit"
+			"Model"		"models/bots/pyro/bot_pyro_gibby.mdl"
+			"Skill"		"Normal"
+			"Count"		"2"
+		}
+		"TFBot"
+		{
+			"Template"	"T_HeavyKit"
+			"Model"		"models/bots/heavy/bot_heavy_gibby.mdl"
+			"Skill"		"Normal"
+		}
+		"TFBot"
+		{
+			"Template"	"T_SoldierKit"
+			"Model"		"models/bots/soldier/bot_soldier_gibby.mdl"
+			"Skill"		"Normal"
+			"MinLevel"	"2"
+		}
+		"TFBot"
+		{
+			"Class"		"Demoman"
+			"Model"		"models/bots/demo/bot_demo_gibby.mdl"
+			"Skill"		"Normal"
+			"MinLevel"	"2"
+		}
+		"TFBot"
+		{
+			"Template"	"T_GiantHeavy"
+			"Name"		"Gibby Giant Heavy"
+			"Model"		"models/bots/heavy_boss/bot_heavy_boss_gibby.mdl"
+			"MinLevel"	"3"
+		}
+	}
+
+	// Goliatron and his escort - 3 / 4 / 6 robots, Goliatron at level 3
+	"Squad"
+	{
+		"Name"			"goliatron"
+		"DisplayName"	"Goliatron's Vanguard"
+		"RespawnDelay"	"15"
+
+		"TFBot"
+		{
+			"Template"	"T_SoldierKit"
+			"Skill"		"Hard"
+			"Count"		"2"
+		}
+		"TFBot"
+		{
+			"Template"	"T_MedicKit"
+			"Skill"		"Hard"
+		}
+		"TFBot"
+		{
+			"Template"	"T_SoldierKit"
+			"Skill"		"Hard"
+			"MinLevel"	"2"
+		}
+		"TFBot"
+		{
+			"Template"	"T_Goliatron"
+			"MinLevel"	"3"
+			"SpawnTime"	"12"
+		}
+		"TFBot"
+		{
+			"Template"	"T_MedicKit"
+			"Skill"		"Expert"
+			"MinLevel"	"3"
+		}
+	}
+
+	// Saxtron H413 and his fan club - 3 / 4 / 5 robots, Saxtron at level 3
+	"Squad"
+	{
+		"Name"			"saxtron"
+		"DisplayName"	"Saxtron H413"
+		"RespawnDelay"	"15"
+
+		"TFBot"
+		{
+			"Template"	"T_ScoutKit"
+			"Skill"		"Hard"
+			"Count"		"2"
+		}
+		"TFBot"
+		{
+			"Template"	"T_HeavyKit"
+			"Skill"		"Hard"
+		}
+		"TFBot"
+		{
+			"Template"	"T_MedicKit"
+			"Skill"		"Hard"
+			"MinLevel"	"2"
+		}
+		"TFBot"
+		{
+			"Template"	"T_Saxtron"
+			"MinLevel"	"3"
+			"SpawnTime"	"12"
+		}
+	}
+}
