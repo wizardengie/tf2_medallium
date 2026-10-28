@@ -1,0 +1,76 @@
+// Robot squads for pl_badwater - added to scripts/robot_squads.txt on this map.
+// A payload map with open ground: squads built to sit on the cart.
+
+"RobotSquads"
+{
+	// Heavies and Medics to stay on the cart - 4 / 6 / 7 robots
+	"Squad"
+	{
+		"Name"			"badwater_cart_crew"
+		"DisplayName"	"Cart Crew"
+		"RespawnDelay"	"12"
+
+		"TFBot"
+		{
+			"Template"	"T_HeavyKit"
+			"Skill"		"Normal"
+			"Count"		"2"
+		}
+		"TFBot"
+		{
+			"Template"	"T_MedicKit"
+			"Skill"		"Normal"
+			"Count"		"2"
+		}
+		"TFBot"
+		{
+			"Template"	"T_SoldierKit"
+			"Skill"		"Normal"
+			"Count"		"2"
+			"MinLevel"	"2"
+		}
+		"TFBot"
+		{
+			"Template"	"T_GiantHeavy"
+			"MinLevel"	"3"
+		}
+	}
+
+	// Snipers for the long sightlines, with Scouts watching their backs - 4 / 5 / 7 robots,
+	// and a Giant Bowman at level 3
+	"Squad"
+	{
+		"Name"			"badwater_overwatch"
+		"DisplayName"	"Overwatch"
+
+		"TFBot"
+		{
+			"Template"	"T_SniperKit"
+			"Skill"		"Normal"
+			"Count"		"2"
+		}
+		"TFBot"
+		{
+			"Template"	"T_ScoutKit"
+			"Skill"		"Normal"
+			"Count"		"2"
+		}
+		"TFBot"
+		{
+			"Template"	"T_SniperKit"
+			"Skill"		"Hard"
+			"MinLevel"	"2"
+		}
+		"TFBot"
+		{
+			"Template"	"T_ScoutKit"
+			"Skill"		"Hard"
+			"MinLevel"	"3"
+		}
+		"TFBot"
+		{
+			"Template"	"T_GiantBowman"
+			"MinLevel"	"3"
+		}
+	}
+}

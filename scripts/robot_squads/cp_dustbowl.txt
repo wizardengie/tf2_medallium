@@ -1,0 +1,115 @@
+// Robot squads for cp_dustbowl - added to scripts/robot_squads.txt on this map.
+// Long sightlines and narrow tunnels: rockets and grenades to clear the
+// chokepoints, and Pyros to hold the tunnels.
+
+"RobotSquads"
+{
+	"Templates"
+	{
+		"T_GiantBurstSoldier"
+		{
+			"Template"		"T_GiantSoldier"
+			"Name"			"Giant Burst Fire Soldier"
+			"ItemAttributes"
+			{
+				"ItemName"							"TF_WEAPON_ROCKETLAUNCHER"
+				"faster reload rate"				"0.6"
+				"fire rate bonus"					"0.1"
+				"clip size upgrade atomic"			"5"
+				"Projectile speed increased"		"0.65"
+			}
+		}
+	}
+
+	// Demomen to shell the chokepoints - 4 / 5 / 6 robots
+	"Squad"
+	{
+		"Name"			"dustbowl_demolition"
+		"DisplayName"	"Demolition Crew"
+
+		"TFBot"
+		{
+			"Class"		"Demoman"
+			"Skill"		"Normal"
+			"Count"		"3"
+		}
+		"TFBot"
+		{
+			"Template"	"T_MedicKit"
+			"Skill"		"Normal"
+		}
+		"TFBot"
+		{
+			"Class"		"Demoman"
+			"Skill"		"Hard"
+			"MinLevel"	"2"
+		}
+		"TFBot"
+		{
+			"Template"	"T_GiantDemoman"
+			"MinLevel"	"3"
+		}
+	}
+
+	// Pyros to hold the tunnels - 4 / 5 / 6 robots, no giants
+	"Squad"
+	{
+		"Name"			"dustbowl_tunnel_rats"
+		"DisplayName"	"Tunnel Rats"
+		"RespawnDelay"	"8"
+
+		"TFBot"
+		{
+			"Template"	"T_PyroKit"
+			"Skill"		"Normal"
+			"Count"		"3"
+		}
+		"TFBot"
+		{
+			"Template"	"T_ScoutKit"
+			"Skill"		"Normal"
+		}
+		"TFBot"
+		{
+			"Template"	"T_PyroKit"
+			"Skill"		"Hard"
+			"MinLevel"	"2"
+		}
+		"TFBot"
+		{
+			"Template"	"T_ScoutKit"
+			"Skill"		"Hard"
+			"MinLevel"	"3"
+		}
+	}
+
+	// Replaces the global Soldier Battalion here: its giant fires bursts of rockets
+	"Squad"
+	{
+		"Name"			"soldier_battalion"
+		"DisplayName"	"Soldier Battalion"
+
+		"TFBot"
+		{
+			"Template"	"T_SoldierKit"
+			"Skill"		"Normal"
+			"Count"		"3"
+		}
+		"TFBot"
+		{
+			"Template"	"T_MedicKit"
+			"Skill"		"Normal"
+		}
+		"TFBot"
+		{
+			"Template"	"T_SoldierKit"
+			"Skill"		"Hard"
+			"MinLevel"	"2"
+		}
+		"TFBot"
+		{
+			"Template"	"T_GiantBurstSoldier"
+			"MinLevel"	"3"
+		}
+	}
+}
